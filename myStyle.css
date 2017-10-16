@@ -1,0 +1,40 @@
+div {
+	padding: 10px;
+}
+
+label {
+	width: 100px;
+	clear: left;
+	padding-right: 10px;
+	padding-bottom: 10px;
+}
+
+input {
+	width: 80px;
+}
+
+input, label {
+	float: left;
+}
+
+#budgetInfo {
+	float: left;
+	width: 30%;
+}
+
+#transAmount {
+	width: 65%;
+}
+
+#transRecord {
+	clear: both;
+}
+
+.floatLeft {
+	float: left;
+}
+
+.floatRight {
+	float: right;
+}
+
