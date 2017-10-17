@@ -42,35 +42,79 @@
 		<h1>Transaction Amounts By Catagory</h1>
 		<div>
 			<script>
+				/**********************************************************
+				Objects variables make for a more modular feel and are easier
+				to modify in place of hard-coding values within code.
+				***********************************************************/
 				var outer = {width: 800, height: 600};
 				var margin = {left: 80, right: 10, top: 20, bottom: 10};
 				var inner = {width: outer.width - margin.left - margin.right, height: outer.height - margin.top - margin.bottom};
 				var barPadding = 0.2;
 
+				/**********************************************************
+				D3 used to create and set a svg object and size.
+				***********************************************************/
 				var svg = d3.select("#transAmount").append("svg")
 					.attr("width", outer.width)
 					.attr("height", outer.height);
 
+				/**********************************************************
+				D3 used to create group elements and set the attributes for
+				each group.
+				***********************************************************/
 				var g = svg.append("g")
 					.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
 				var yAxisG = g.append("g")
 					.attr("transform", "translate(0 ," + inner.width +")")
-					.attr("transform", "rotate(0)");
+					.attr("transform", "rotate(0)"); // Moves y axis to the left
 				var xAxisG = g.append("g")
 
+				/**********************************************************
+				x and y scales set the range (amount of space) the graph 
+				will take up. 
+				***********************************************************/
 				var yScale = d3.scaleBand()
-					.range([0, inner.width/2])
+					// Inner.height is divided by 1.5 to ensure bars are visiable within the screen. 
+					.range([0, inner.height/1.5])
+					// Adds spacing between graph bars
 					.padding(barPadding);
 				var xScale = d3.scaleLinear()
-					.range([0, inner.height]);
+					// x-axis goes from 0 to highest dollar amount
+					.range([0, inner.width]);
 
+				/**********************************************************
+				D3 used to set the position of the x and y label-axies
+				***********************************************************/
 				var xAxis = d3.axisTop(xScale);
 				var yAxis = d3.axisLeft(yScale);
 
+				/**********************************************************
+				D3 color scheme that uses the categories to determine the
+				colors within the pre-defined catagory20 color scheme. The
+				20 stands for the 20 colors used to make up the color scheme.
+				***********************************************************/
 				var colorScale = d3.scaleOrdinal(d3.schemeCategory20);
 				
+				/**********************************************************
+				Reads the csv file used to render the horizontial bar graph
+				and passes the csv file into the render function.
+				***********************************************************/
+				d3.csv("expensesSept2.csv", render);
+
+				/**********************************************************
+				Renders the graph from the provided csv file.
+				***********************************************************/
 				function render(data) {
 
+					/**********************************************************
+					Parse the csv into a new nested array with a {key, value}
+					where:
+					key = A category (ex: coffee)
+					value = The grand total of all transactions within this
+					category (ex: coffee purchase for 5.00 and another one for
+					6.00 grand total/value for coffee category would be 11.00).
+					***********************************************************/
 					var sumCategories = d3.nest() 
 						.key(function(d) {return d.category})
 						.rollup(function(d) {
@@ -78,25 +122,40 @@
 						})
 						.entries(data);
 
+					/**********************************************************
+					Sets the domain for the data from a value of 0 to the highest 
+					dollar amount found out of all the values within the 
+					sumCategories array.
+					***********************************************************/
 					xScale.domain([0, d3.max(sumCategories, function(d){return +d.value})]);
 					yScale.domain(sumCategories.map(function(d){return d.key}));
 					
+					/**********************************************************
+					Calls the grouped x and y element from before the render
+					function and sets the values and keys as text to the x and y
+					axis bars within the domain set by the domain. 
+					***********************************************************/
 					xAxisG.call(xAxis);
 					yAxisG.call(yAxis);
 
+					/**********************************************************
+					Appends all data from the nested array as the data bars to
+					graph displayed in the HTML.
+					***********************************************************/
+					// Selects all DOM rectangle objects, if none, make rect objects
 					var rects = g.selectAll("rect").data(sumCategories);
+					// Data "enters" the HTML
 					rects.enter().append("rect")
 						.attr("height", yScale.bandwidth())
-					.merge(rects)
+					.merge(rects) // Updates the data if changed
 						.attr("y", (sumCategories, function(d){return yScale(d.key)}))
 						.attr("x", 0)
 						.attr("width", (sumCategories, function(d){return xScale(d.value)}))
 						.style("fill", (sumCategories, function(d){return colorScale(d.key)}));
 
+					// Remove data no longer being used such as unused categories
 					rects.exit().remove();
 				}
-
-				d3.csv("expensesSept2.csv", render);
 			</script>
 		</div>
 	</div>
@@ -143,7 +202,7 @@
 				d3.csv("expensesSept2.csv", makeTable);
 			</script> -->
 
-			
+
 			<!-- <script>
 
     // the table rows, typically loaded from data file using d3.csv
